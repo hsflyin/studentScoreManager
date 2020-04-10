@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjsxt.mapper.StudentMapper">
+	<resultMap type="com.bjsxt.pojo.Student" id="stu">
+		<id property="sno" column="sno"/>
+		<result property="sid" column="sid"/>
+		<result property="sname" column="sname"/>
+		<result property="gender" column="gender"/>
+		<result property="birthtime" column="birthtime"/>
+		<result property="birthplace" column="birthplace"/>
+		<result property="intime" column="intime"/>
+		<result property="clazzno" column="clazzno"/>
+		<association property="clazz" javaType="com.bjsxt.pojo.Clazz">
+			<id property="clazzno" column="clazzno"/>
+			<result property="cname" column="cname"/>
+		</association>
+	</resultMap>
+	<select id="selAllStudent"  resultMap="stu">
+		select * from student s left join clazz c on s.clazzno = c.clazzno limit #{0},#{1}
+	</select>
+	
+	<select id="selStudentCourse"  resultMap="stu">
+		select * from student s left join clazz c on s.clazzno = c.clazzno where sno = #{0}
+	</select>
+	
+	<select id="selStudentCount" resultType="int">
+		select count(*) from student
+	</select>
+
+
+	<delete id="deleteStudent" parameterType="int">
+		delete from student where sno=#{0}
+	</delete>
+	
+	<delete id="deleteStudents" parameterType="int">
+		delete from student where sno in 
+		<foreach collection="array" item="sids" open="(" separator="," close=")">
+			#{sids}
+		</foreach>
+	</delete>
+	
+	<insert id="insertStudent" parameterType="com.bjsxt.pojo.Student">
+		insert into student (sid,sname,gender,birthtime,birthplace,pwd,intime,clazzno,rid)
+		 	values(#{sid},#{sname},#{gender},#{birthtime},#{birthplace},'123',#{intime},#{clazzno},"3")
+	</insert>
+	
+	<select id="selStudentBySno" parameterType="int" resultType="com.bjsxt.pojo.Student">
+		select * from student where sno = #{0}
+	</select>
+	
+	<select id="selStudentBySid" parameterType="int" resultType="com.bjsxt.pojo.Student">
+		select * from student where sid = #{0}
+	</select>
+	
+	<update id="updateStudentBySid" parameterType="com.bjsxt.pojo.Student">
+		update student
+		<set>
+			<if test="sid != null and sid != '' ">
+				sid = #{sid},
+			</if>
+			<if test="sname != null and sname != '' ">
+				sname = #{sname},
+			</if>
+			<if test="gender != null and gender != '' ">
+				gender = #{gender},
+			</if>
+			<if test="birthtime != null and birthtime != '' ">
+				birthtime = #{birthtime},
+			</if>
+			<if test="birthplace != null and birthplace != '' ">
+				birthplace = #{birthplace},
+			</if>
+			<if test="intime != null and intime != '' ">
+				intime = #{intime},
+			</if>
+			<if test="clazzno != null and clazzno != '' ">
+				clazzno = #{clazzno},
+			</if>
+			<if test="sno != null and sno != '' ">
+				sno = #{sno}
+			</if>
+		</set>
+		where sno = #{sno}
+	</update>
+	
+	<select id="selStudentLike" parameterType="com.bjsxt.pojo.Student" resultMap="stu">
+		select * from student s left join clazz c on s.clazzno = c.clazzno 
+		<if test="sid!=null||sname!=null">
+		
+			<where>
+				<if test="sid != null and sid != 0">
+					sid like '%${sid}%'
+				</if>
+				<if test="sname != null">
+					and sname like '%${sname}%'
+				</if>
+			</where>			
+		</if>
+	</select>
+	
+	<select id="selStudentLike1" resultMap="stu">
+		select * from student s 
+		left join clazz c 
+		on s.clazzno = c.clazzno 	
+		where sid like CONCAT('%',#{0},'%') 
+		and sname like CONCAT('%',#{1},'%') 
+		limit #{2},#{3}
+	</select>
+	
+	<select id="selLikeStudentCount" parameterType="com.bjsxt.pojo.Student" resultType="int">
+		select count(*) from student
+		<if test="sid!=null||sname!=null">
+		
+			<where>
+				<if test="sid != null and sid != 0">
+					sid like '%${sid}%'
+				</if>
+				<if test="sname != null">
+					and sname like '%${sname}%'
+				</if>
+			</where>			
+		</if>
+	</select>
+	
+	<insert id="stuChooseCourse" parameterType="java.util.List" useGeneratedKeys="false">  
+        insert into course_teacher_student (cno,tno,sno,score) values 
+        <foreach collection="list" item="item" index="index" separator=",">  
+                (  
+                    #{item.cno},  
+                    #{item.tno},  
+                    #{item.sno}, 
+                    #{item.score}
+                )  
+        </foreach>  
+	</insert> 
+	
+	<select id="selectCouTeaStu" parameterType="java.util.List" resultType="com.bjsxt.pojo.CouTeaStu">
+		select * from course_teacher_student where
+		<foreach collection="list" item="item" index="index" separator="or">  
+                (  
+                    cno = #{item.cno} and 
+                    tno = #{item.tno} and
+                    sno = #{item.sno}
+                )  
+        </foreach>  
+	</select>
+	
+	
+	<resultMap type="com.bjsxt.pojo.Course" id="selectedCourse">
+		<id property="cno" column="cno"/>
+		<result property="cid" column="cid"/>
+		<result property="cname" column="cname"/>
+		<result property="credit" column="credit"/>
+		<result property="preiodstart" column="preiodstart"/>
+		<result property="preiodend" column="preiodend"/>
+		<result property="score" column="score"/>
+		<association property="teacher" javaType="com.bjsxt.pojo.Teacher">
+			<id property="tno" column="tno"/>
+			<result property="tid" column="tid"/>
+			<result property="tname" column="tname"/>
+			<result property="dept" column="dept"/>
+			<result property="birthdate" column="birthdate"/>
+			<result property="birthplace" column="birthplace"/>
+			<result property="phone" column="phone"/>
+		</association>
+	</resultMap>
+	 <select id="selselectedCourse" resultMap="selectedCourse">
+	 	select * from course c 
+	 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+		LEFT JOIN teacher t on t.tno = cts.tno 
+		where cts.sno = #{param1}
+	 </select>
+	 
+	 
+	 <resultMap type="com.bjsxt.pojo.CouTeaStu" id="teachersetscore">
+	 		<id property="ctsid" column="ctsid"/>
+	 		<result property="cno" column="cno"/>
+	 		<result property="tno" column="tno"/>
+	 		<result property="sno" column="sno"/>
+	 		<result property="score" column="score"/>
+ 		<association property="student" javaType="com.bjsxt.pojo.Student">
+			<id property="sno" column="sno"/>
+			<result property="sid" column="sid"/>
+			<result property="sname" column="sname"/>
+		</association>
+		<association property="teacher" javaType="com.bjsxt.pojo.Teacher">
+			<id property="tno" column="tno"/>
+			<result property="tname" column="tname"/>
+		</association>
+		<association property="course" javaType="com.bjsxt.pojo.Course">
+			<id property="cno" column="cno"/>
+			<result property="cid" column="cid"/>
+			<result property="cname" column="cname"/>
+			<result property="credit" column="credit"/>
+			<result property="preiodstart" column="preiodstart"/>
+			<result property="preiodend" column="preiodend"/>
+			<result property="score" column="score"/>
+		</association>
+		<association property="clazz" javaType="com.bjsxt.pojo.Clazz">
+			<id property="clazzno" column="clazzno"/>
+			<result property="cname" column="clazzname"/>
+		</association>
+	</resultMap>
+	 <select id="teacherSetScore" resultMap="teachersetscore">
+	 	select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+	 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+		LEFT JOIN teacher t on t.tno = cts.tno 
+		LEFT JOIN student s on s.sno = cts.sno
+		LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+		where cts.tno = #{param1} and cts.score = 0
+	 </select>
+	 
+	 <update id="setScore">
+	 	update course_teacher_student set score=#{param2} where ctsid = #{param1}
+	 </update>
+	 
+	 <select id="selStudentScore"  resultMap="teachersetscore">
+	 	select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+	 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+		LEFT JOIN teacher t on t.tno = cts.tno 
+		LEFT JOIN student s on s.sno = cts.sno
+		LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+		where cts.tno = #{param1} and cts.score != 0
+	 </select>
+	 
+	 <select id="selStudentScoreAsc"  resultMap="teachersetscore">
+	 	select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+	 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+		LEFT JOIN teacher t on t.tno = cts.tno 
+		LEFT JOIN student s on s.sno = cts.sno
+		LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+		where cts.tno = #{param1} and cts.score != 0
+		order by score asc
+	 </select>
+	 <select id="selStudentScoreDesc"  resultMap="teachersetscore">
+	 	select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+	 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+		LEFT JOIN teacher t on t.tno = cts.tno 
+		LEFT JOIN student s on s.sno = cts.sno
+		LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+		where cts.tno = #{param1} and cts.score != 0
+		order by score desc
+	 </select>
+	 
+	 <select id="selLikeStudentScore" resultMap="teachersetscore">
+		 select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+		 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+			LEFT JOIN teacher t on t.tno = cts.tno 
+			LEFT JOIN student s on s.sno = cts.sno
+			LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+			<where>
+				cts.tno = #{param1}  and cts.score != 0	
+				<if test="param2 != null and param2 != '' ">
+					and	s.sid like CONCAT('%',#{param2},'%') 
+				</if>
+				<if test="param3 != null and param3 != '' ">
+					and	s.sname like CONCAT('%',#{param3},'%') 
+				</if>
+				<if test="param4 != null and param4 != '' ">
+					and	cl.cname like CONCAT('%',#{param4},'%') 
+				</if>
+			</where>
+	 </select>
+	 <select id="selLikeStudentScoreAsc" resultMap="teachersetscore">
+		 select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+		 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+			LEFT JOIN teacher t on t.tno = cts.tno 
+			LEFT JOIN student s on s.sno = cts.sno
+			LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+			<where>
+				cts.tno = #{param1}  and cts.score != 0	
+				<if test="param2 != null and param2 != '' ">
+					and	s.sid like CONCAT('%',#{param2},'%') 
+				</if>
+				<if test="param3 != null and param3 != '' ">
+					and	s.sname like CONCAT('%',#{param3},'%') 
+				</if>
+				<if test="param4 != null and param4 != '' ">
+					and	cl.cname like CONCAT('%',#{param4},'%') 
+				</if>
+			</where>
+			order by score asc
+	 </select>
+	 <select id="selLikeStudentScoreDesc" resultMap="teachersetscore">
+		 select cts.*,c.*,s.*,cl.clazzno,cl.cname 'clazzname',t.tname,t.tno from course c 
+		 	LEFT JOIN course_teacher_student cts on c.cno = cts.cno 	
+			LEFT JOIN teacher t on t.tno = cts.tno 
+			LEFT JOIN student s on s.sno = cts.sno
+			LEFT JOIN clazz cl on cl.clazzno = s.clazzno
+			<where>
+				cts.tno = #{param1}  and cts.score != 0	
+				<if test="param2 != null and param2 != '' ">
+					and	s.sid like CONCAT('%',#{param2},'%') 
+				</if>
+				<if test="param3 != null and param3 != '' ">
+					and	s.sname like CONCAT('%',#{param3},'%') 
+				</if>
+				<if test="param4 != null and param4 != '' ">
+					and	cl.cname like CONCAT('%',#{param4},'%') 
+				</if>
+			</where>
+			order by score desc
+	 </select>
+	 
+</mapper>
+
+ 

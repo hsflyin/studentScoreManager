@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjsxt.mapper.CourseMapper">
+	<select id="selCourse" resultType="com.bjsxt.pojo.Course"> 
+		select c.*,t.tname "teacher.tname",t.tno "teacher.tno" from course c left join course_teacher ct 
+		on c.cno = ct.cno	
+		left join teacher t
+		on t.tno = ct.tno
+	</select>
+	
+	<select id="selAllCourse" resultType="com.bjsxt.pojo.Course">
+		select * from course
+	</select>
+
+	<select id="selCourseByCno" resultType="com.bjsxt.pojo.Course">
+		select * from course where cno = #{param1}
+	</select>
+	
+	<delete id="deleteCourse">
+		delete from course where cno = #{param1}
+	</delete>
+	
+	<insert id="insertCourse">
+		insert into course (cname,credit,preiodstart,preiodend)
+		values(#{cname},#{credit},#{preiodstart},#{preiodend})
+	</insert>
+	
+	<select id="selTeacherByTno" resultType="com.bjsxt.pojo.Teacher">
+		select * from teacher where tno = #{param1}
+	</select>
+	
+	<update id="updateCourse">
+		update course
+		<set>
+			<if test="cid != null and cid != '' ">
+				cid = #{cid},
+			</if>
+			<if test="cname != null and cname != '' ">
+				cname = #{cname},
+			</if>
+			<if test="credit != null and credit != '' ">
+				credit = #{credit},
+			</if>
+			<if test="preiodstart != null and preiodstart != '' ">
+				preiodstart = #{preiodstart},
+			</if>
+			<if test="preiodend != null and preiodend != '' ">
+				preiodend = #{preiodend},
+			</if>
+			<if test="cno != null and cno != '' ">
+				cno = #{cno}
+			</if>
+		</set>
+		where cno = #{cno}
+	
+	</update>
+	
+	<delete id="deleteCourses" parameterType="int">
+		delete from course where cno in 
+		<foreach collection="array" item="cnos" open="(" separator="," close=")">
+			#{cnos}
+		</foreach>
+	</delete>
+	
+	<insert id="insertTC">
+		insert into course_teacher (cno,tno)
+		values(#{param1},#{param2})
+	</insert>
+	
+	<select id="selTC" resultType="map">
+		select * from course_teacher where cno = #{param1} and tno = #{param2}
+	</select>
+</mapper>

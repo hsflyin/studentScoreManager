@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjsxt.mapper.TeacherMapper">
+	<select id="selTeacher" resultType="com.bjsxt.pojo.Teacher"> 
+		select * from teacher
+	</select>
+
+	<select id="selTeacherByDept" resultType="com.bjsxt.pojo.Teacher">
+		select * from teacher where dept = #{param1}
+	</select>
+	
+	<delete id="deleteTeacherByTno">
+		delete from teacher where tno = #{param1}
+	</delete>
+	
+	<insert id="insertTeacher">
+		insert into teacher (tname,dept,birthdate,enterdate,birthplace,pwd,phone,rid)
+		values(#{tname},#{dept},#{birthdate},#{enterdate},#{birthplace},'123',#{phone},"2")
+	</insert>
+	
+	<select id="selTeacherByTno" resultType="com.bjsxt.pojo.Teacher">
+		select * from teacher where tno = #{param1}
+	</select>
+	
+	<update id="updateTeacher">
+		update teacher
+		<set>
+			<if test="tid != null and tid != '' ">
+				tid = #{tid},
+			</if>
+			<if test="tname != null and tname != '' ">
+				tname = #{tname},
+			</if>
+			<if test="dept != null and dept != '' ">
+				dept = #{dept},
+			</if>
+			<if test="birthdate != null and birthdate != '' ">
+				birthdate = #{birthdate},
+			</if>
+			<if test="enterdate != null and enterdate != '' ">
+				enterdate = #{enterdate},
+			</if>
+			<if test="birthplace != null and birthplace != '' ">
+				birthplace = #{birthplace},
+			</if>
+			<if test="pwd != null and pwd != '' ">
+				pwd = #{pwd},
+			</if>
+			<if test="phone != null and phone != '' ">
+				phone = #{phone},
+			</if>
+			<if test="tno != null and tno != '' ">
+				tno = #{tno}
+			</if>
+		</set>
+		where tno = #{tno}
+	
+	</update>
+	
+	<delete id="deleteTeachers" parameterType="int">
+		delete from teacher where tno in 
+		<foreach collection="array" item="tnos" open="(" separator="," close=")">
+			#{tnos}
+		</foreach>
+	</delete>
+</mapper>
